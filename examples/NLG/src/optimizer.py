@@ -15,6 +15,8 @@ import torch.nn.functional as F
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
 
+from pytorch_optimizer.sophia import SophiaH
+
 
 def add_optimizer_params(parser: argparse.ArgumentParser):
     parser.add_argument('--lr', default=0.00001, type=float, help='learning rate')
@@ -24,7 +26,19 @@ def add_optimizer_params(parser: argparse.ArgumentParser):
     parser.add_argument('--no_decay_bias', action='store_true', help='no weight decay on bias weigh')
     parser.add_argument('--adam_beta1', default=0.9, type=float, help='adam beta1 term')
     parser.add_argument('--adam_beta2', default=0.98, type=float, help='adam beta2 term')
-    
+
+     # Additional parameters for Sophia optimizer
+    parser.add_argument('--sophia_lr', type=float, default=6e-2, help='initial learning rate for Sophia optimizer')
+    parser.add_argument('--betas', type=tuple, default=(0.96, 0.99), help='betas for Sophia optimizer')
+    parser.add_argument('--sophia_weight_decay', type=float, default=0.0, help='weight decay for Sophia optimizer')
+    parser.add_argument('--weight_decouple', type=bool, default=True, help='weight decouple for Sophia optimizer')
+    parser.add_argument('--fixed_decay', type=bool, default=False, help='fixed decay for Sophia optimizer')
+    parser.add_argument('--p', type=float, default=1e-2, help='clip effective gradient for Sophia optimizer')
+    parser.add_argument('--update_period', type=int, default=10, help='update period for Sophia optimizer')
+    parser.add_argument('--num_samples', type=int, default=1, help='number of samples for Sophia optimizer')
+    parser.add_argument('--hessian_distribution', type=str, default='gaussian', help='hessian distribution for Sophia optimizer')
+    parser.add_argument('--eps', type=float, default=1e-12, help='epsilon for Sophia optimizer')
+
     parser.add_argument('--scheduler', default='linear', type=str,
                         choices=['cosine', 'inv_sqrt', 'dev_perf', 'constant', 'linear', 'cycle'],
                         help='lr scheduler to use.')
@@ -308,6 +322,8 @@ def create_adam_optimizer(
     return optimizer
 
 
+
+
 def create_sgd_optimizer(model, lr):
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.0)
     return optimizer
@@ -326,6 +342,22 @@ def create_adam_optimizer_from_args(model, args, grouped_parameters=None):
         correct_bias=args.correct_bias
     )
     return optimizer
+
+def create_sophia_optimizer_from_args(model, args):
+    return SophiaH(
+       model.parameters(),
+       lr=args.sophia_lr,
+       betas=args.betas,
+       weight_decay=args.sophia_weight_decay,
+       weight_decouple=args.weight_decouple,
+       fixed_decay=args.fixed_decay,
+       p=args.p,
+       update_period=args.update_period,
+       num_samples=args.num_samples,
+       hessian_distribution=args.hessian_distribution,
+       eps=args.eps,
+    )
+
 
 
 def create_optimizer_scheduler(optimizer, args):

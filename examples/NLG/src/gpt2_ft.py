@@ -26,7 +26,8 @@ from optimizer import (
     create_adam_optimizer, 
     create_optimizer_scheduler, 
     add_optimizer_params, 
-    create_adam_optimizer_from_args
+    create_adam_optimizer_from_args,
+    create_sophia_optimizer_from_args  # New function for Sophia optimizer
 )
 
 from data_utils import FT_Dataset
@@ -39,6 +40,8 @@ parser = argparse.ArgumentParser(description='PyTorch GPT2 ft script')
 
 add_gpu_params(parser)
 add_optimizer_params(parser)
+
+parser.add_argument('--optimizer', default='adam', choices=['adam', 'sophia'], help='optimizer to use')
 
 parser.add_argument('--train_data', required=True, help='location of training data corpus')
 
@@ -327,7 +330,12 @@ if __name__ == '__main__':
 
     if args.lora_dim > 0:
         lora.mark_only_lora_as_trainable(lm_net)
-    optimizer = create_adam_optimizer_from_args(lm_net, args)
+
+     # Create optimizer based on user's choice
+    if args.optimizer == 'adam':
+        optimizer = create_adam_optimizer_from_args(lm_net, args)
+    elif args.optimizer == 'sophia':
+        optimizer = create_sophia_optimizer_from_args(lm_net, args)  # Use Sophia optimizer if specified
 
     if args.max_step is None:
         args.max_step = (args.max_epoch * train_data.num_batches + args.world_size - 1) // args.world_size
