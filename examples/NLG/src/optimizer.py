@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
 
-from pytorch_optimizer.sophia import SophiaH
+from pytorch_optimizer import SophiaH
 
 
 def add_optimizer_params(parser: argparse.ArgumentParser):
