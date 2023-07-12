@@ -348,7 +348,7 @@ def create_sophia_optimizer_from_args(model, args):
     return SophiaH(
        model.parameters(),
        lr=args.sophia_lr,
-       betas=(args.sophia_beta1, args.sophia_beta2),,
+       betas=(args.sophia_beta1, args.sophia_beta2),
        weight_decay=args.sophia_weight_decay,
        weight_decouple=args.weight_decouple,
        fixed_decay=args.fixed_decay,
