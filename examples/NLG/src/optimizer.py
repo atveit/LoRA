@@ -29,7 +29,8 @@ def add_optimizer_params(parser: argparse.ArgumentParser):
 
      # Additional parameters for Sophia optimizer
     parser.add_argument('--sophia_lr', type=float, default=6e-2, help='initial learning rate for Sophia optimizer')
-    parser.add_argument('--betas', type=tuple, default=(0.96, 0.99), help='betas for Sophia optimizer')
+    parser.add_argument('--sophia_beta1', default=0.96, type=float, help='sophia beta1 term')
+    parser.add_argument('--sophia_beta2', default=0.99, type=float, help='sophia beta2 term')
     parser.add_argument('--sophia_weight_decay', type=float, default=0.0, help='weight decay for Sophia optimizer')
     parser.add_argument('--weight_decouple', type=bool, default=True, help='weight decouple for Sophia optimizer')
     parser.add_argument('--fixed_decay', type=bool, default=False, help='fixed decay for Sophia optimizer')
@@ -347,7 +348,7 @@ def create_sophia_optimizer_from_args(model, args):
     return SophiaH(
        model.parameters(),
        lr=args.sophia_lr,
-       betas=args.betas,
+       betas=(args.sophia_beta1, args.sophia_beta2),,
        weight_decay=args.sophia_weight_decay,
        weight_decouple=args.weight_decouple,
        fixed_decay=args.fixed_decay,
